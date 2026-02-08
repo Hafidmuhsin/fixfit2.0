@@ -1,13 +1,13 @@
 databases:
   - name: fixfit_db
     databaseName: fixfit
-    user: fixfit_user
+    user: fixfit
 
 services:
   - type: web
     name: fixfit
     env: python
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate"
+    buildCommand: "./build.sh"
     startCommand: "gunicorn fixfit.wsgi:application"
     envVars:
       - key: DATABASE_URL
@@ -17,6 +17,4 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: WEB_CONCURRENCY
-        value: "4"
-      - key: PYTHON_VERSION
-        value: "3.12.3"
+        value: 4
