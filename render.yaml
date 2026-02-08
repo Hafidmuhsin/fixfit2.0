@@ -7,7 +7,7 @@ services:
   - type: web
     name: fixfit
     env: python
-    buildCommand: "./build.sh"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate"
     startCommand: "gunicorn fixfit.wsgi:application"
     envVars:
       - key: DATABASE_URL
@@ -17,6 +17,6 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: WEB_CONCURRENCY
-        value: 4
+        value: "4"
       - key: PYTHON_VERSION
-        value: 3.12.3
+        value: "3.12.3"
