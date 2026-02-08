@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIX-FIT | Luxury Wellness</title>
+    <!-- Tailwind CSS -->
+    <link href="{% static 'css/output.css' %}" rel="stylesheet">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <!-- Three.js -->
+    <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js"></script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            /* Fallback */
+            overflow-x: hidden;
+        }
+
+        .canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* Fix Dropdown Readability */
+        select option {
+            background-color: #1f2937;
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-white">
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container" class="canvas-bg"></div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 backdrop-blur-md bg-gray-900/80 border-b border-white/10"
+        x-data="{ mobileOpen: false, userMenu: false }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    <a href="{% url 'index' %}" class="flex items-center space-x-2 group">
+                        <div
+                            class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 group-hover:scale-110 transition-transform duration-300">
+                            <span class="text-white font-bold text-lg">F</span>
+                        </div>
+                        <span
+                            class="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 group-hover:to-white transition-all duration-300">FIX-FIT</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="{% url 'dashboard' %}"
+                            class="px-3 py-2 rounded-md text-sm font-medium hover:text-cyan-400 transition-colors duration-300 {% if request.path == '/dashboard/' %}text-cyan-400 bg-white/5{% else %}text-gray-300{% endif %}">Dashboard</a>
+                        <a href="{% url 'profile' %}"
+                            class="px-3 py-2 rounded-md text-sm font-medium hover:text-cyan-400 transition-colors duration-300 {% if 'profile' in request.path %}text-cyan-400 bg-white/5{% else %}text-gray-300{% endif %}">Profile
+                            & Analysis</a>
+                        <a href="{% url 'assistant' %}"
+                            class="px-3 py-2 rounded-md text-sm font-medium hover:text-cyan-400 transition-colors duration-300 {% if 'assistant' in request.path %}text-cyan-400 bg-white/5{% else %}text-gray-300{% endif %}">AI
+                            Coach</a>
+                    </div>
+                </div>
+
+                <!-- User Profile / Auth (Desktop) -->
+                <div class="hidden md:block">
+                    <div class="ml-4 flex items-center md:ml-6 space-x-4">
+                        {% if user.is_authenticated %}
+                        <div class="relative">
+                            <button @click="userMenu = !userMenu"
+                                class="flex items-center space-x-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded-full p-1">
+                                <span class="text-gray-300 hover:text-white transition-colors">{{ user.username
+                                    }}</span>
+                                <div
+                                    class="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 shadow-md ring-2 ring-white/10 flex items-center justify-center text-xs font-bold">
+                                    {{ user.username.0|upper }}</div>
+                            </button>
+
+                            <!-- Dropdown -->
+                            <div x-show="userMenu" @click.away="userMenu = false"
+                                class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl border border-white/10 py-1 glass-panel"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="transform opacity-0 scale-95"
+                                x-transition:enter-end="transform opacity-100 scale-100" x-cloak>
+                                <a href="{% url 'profile' %}"
+                                    class="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white">Profile
+                                    & Analysis</a>
+                                <div class="border-t border-white/10 my-1"></div>
+                                <form action="{% url 'logout' %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                        class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300">Sign
+                                        out</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% else %}
+                        <a href="{% url 'login' %}" class="text-sm text-gray-300 hover:text-white transition-colors">Log
+                            in</a>
+                        <a href="{% url 'register' %}"
+                            class="px-4 py-2 rounded-full bg-white text-gray-900 text-sm font-semibold hover:bg-gray-100 transition-colors shadow-lg shadow-white/10">Get
+                            Started</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button @click="mobileOpen = !mobileOpen" type="button"
+                        class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" :class="{'hidden': mobileOpen, 'block': !mobileOpen }"
+                            stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <svg class="h-6 w-6" :class="{'block': mobileOpen, 'hidden': !mobileOpen }"
+                            stroke="currentColor" fill="none" viewBox="0 0 24 24" x-cloak>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div x-show="mobileOpen" class="md:hidden bg-gray-900 border-b border-white/10" x-cloak>
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="{% url 'dashboard' %}"
+                    class="block px-3 py-2 rounded-md text-base font-medium text-white bg-gray-800">Dashboard</a>
+                <a href="{% url 'profile' %}"
+                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Health
+                    Profile</a>
+                <a href="{% url 'assistant' %}"
+                    class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">AI
+                    Coach</a>
+            </div>
+
+            <div class="pt-4 pb-4 border-t border-gray-700">
+                {% if user.is_authenticated %}
+                <div class="flex items-center px-5">
+                    <div class="flex-shrink-0">
+                        <div
+                            class="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center font-bold text-white">
+                            {{ user.username.0|upper }}</div>
+                    </div>
+                    <div class="ml-3">
+                        <div class="text-base font-medium leading-none text-white">{{
+                            user.first_name|default:user.username }}</div>
+                        <div class="text-sm font-medium leading-none text-gray-400 mt-1">{{ user.email }}</div>
+                    </div>
+                </div>
+                <div class="mt-3 px-2 space-y-1">
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-400 hover:text-red-300 hover:bg-gray-700">Sign
+                            out</button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="mt-3 px-2 space-y-1">
+                    <a href="{% url 'login' %}"
+                        class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Log
+                        in</a>
+                    <a href="{% url 'register' %}"
+                        class="block px-3 py-2 rounded-md text-base font-medium text-cyan-400 hover:text-cyan-300 hover:bg-gray-700">Get
+                        Started</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% if messages %}
+        <div class="mb-8 space-y-2">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm flex items-center shadow-lg backdrop-blur-sm"
+                role="alert">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 bg-gray-900/50 backdrop-blur-md mt-auto z-10">
+        <div
+            class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex justify-between items-center flex-col md:flex-row space-y-4 md:space-y-0">
+            <p class="text-gray-500 text-sm">© 2026 FIX-FIT. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-500 hover:text-gray-300 transition-colors">Privacy</a>
+                <a href="#" class="text-gray-500 hover:text-gray-300 transition-colors">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

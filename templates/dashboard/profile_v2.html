@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-white">Health Profile & Analysis</h1>
+        <p class="text-gray-400 text-sm">Update your biometrics for accurate AI insights.</p>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left: Edit Profile Form -->
+        <div class="lg:col-span-1 bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl">
+            <h2 class="text-xl font-bold text-white mb-6">Your Details</h2>
+            <form action="{% url 'update_profile' %}" method="POST" class="space-y-5">
+                {% csrf_token %}
+
+                <!-- Biometrics -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs uppercase text-gray-400 mb-1">Height (cm)</label>
+                        <input type="number" step="0.1" name="height" value="{{ user.height }}"
+                            class="w-full bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white focus:ring-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase text-gray-400 mb-1">Weight (kg)</label>
+                        <input type="number" step="0.1" name="weight" value="{{ user.weight }}"
+                            class="w-full bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white focus:ring-cyan-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase text-gray-400 mb-1">Date of Birth</label>
+                    <input type="date" name="date_of_birth" value="{{ user.date_of_birth|date:'Y-m-d' }}"
+                        class="w-full bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-gray-300">
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase text-gray-400 mb-1">Gender</label>
+                    <select name="gender"
+                        class="w-full bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white">
+                        <option value="M" {% if user.gender=="M" %}selected{% endif %}>Male</option>
+                        <option value="F" {% if user.gender=="F" %}selected{% endif %}>Female</option>
+                        <option value="O" {% if user.gender=="O" %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+
+                <div class="border-t border-white/10 pt-4"></div>
+
+                <!-- Goals -->
+                <div>
+                    <label class="block text-xs uppercase text-gray-400 mb-1">Primary Goal</label>
+                    <select name="primary_goal"
+                        class="w-full bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white">
+                        <option value="lose_weight" {% if goal.primary_goal=="lose_weight" %}selected{% endif %}>Lose
+                            Weight</option>
+                        <option value="maintain" {% if goal.primary_goal=="maintain" %}selected{% endif %}>Maintain
+                            Weight</option>
+                        <option value="gain_muscle" {% if goal.primary_goal=="gain_muscle" %}selected{% endif %}>Gain
+                            Muscle</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs uppercase text-gray-400 mb-1">Activity Level</label>
+                    <select name="activity_level"
+                        class="w-full bg-gray-800 border border-white/10 rounded-lg px-3 py-2 text-white">
+                        <option value="sedentary" {% if goal.activity_level=="sedentary" %}selected{% endif %}>Sedentary
+                            (Desk Job)</option>
+                        <option value="lightly_active" {% if goal.activity_level=="lightly_active" %}selected{% endif
+                            %}>Lightly Active</option>
+                        <option value="moderately_active" {% if goal.activity_level=="moderately_active" %}selected{%
+                            endif %}>Moderately Active</option>
+                        <option value="very_active" {% if goal.activity_level=="very_active" %}selected{% endif %}>Very
+                            Active (Athlete)</option>
+                    </select>
+                </div>
+
+                <button type="submit"
+                    class="w-full btn-primary py-3 rounded-xl mt-4 shadow-lg shadow-cyan-500/20">Recalculate
+                    Analysis</button>
+            </form>
+        </div>
+
+        <!-- Right: Analysis & Insights -->
+        <div class="lg:col-span-2 space-y-8">
+
+            <!-- BMI Card -->
+            <div
+                class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 border border-white/10 relative overflow-hidden">
+                <div
+                    class="absolute top-0 right-0 w-64 h-64 bg-{% if bmi_category == 'Normal Weight' %}green{% elif bmi_category == 'Overweight' %}yellow{% else %}red{% endif %}-500/20 rounded-full blur-3xl -mr-20 -mt-20">
+                </div>
+
+                <h3 class="text-gray-400 uppercase tracking-wider text-sm font-semibold mb-6">Body Mass Index (BMI)</h3>
+
+                <div class="flex items-end space-x-4">
+                    <span class="text-6xl font-bold text-white">{{ bmi }}</span>
+                    <span class="text-xl font-medium mb-2 
+                        {% if bmi_category == 'Normal Weight' %}text-green-400
+                        {% elif bmi_category == 'Overweight' %}text-yellow-400
+                        {% elif bmi_category == 'Underweight' %}text-blue-400
+                        {% else %}text-red-400{% endif %}">
+                        {{ bmi_category }}
+                    </span>
+                </div>
+
+                <div class="mt-6 w-full bg-gray-700/50 h-3 rounded-full relative">
+                    <!-- Scale Markers -->
+                    <div class="absolute top-0 left-0 h-full w-[18.5%] bg-blue-500/30 rounded-l-full"></div>
+                    <div class="absolute top-0 left-[18.5%] h-full w-[6.5%] bg-green-500/30"></div>
+                    <!-- Simplified Visual Bar -->
+                    <div class="w-full h-full bg-gray-800 rounded-full overflow-hidden flex">
+                        <div class="w-[46%] h-full bg-blue-900/50 border-r border-black/20" title="Underweight"></div>
+                        <div class="w-[16%] h-full bg-green-900/50 border-r border-black/20" title="Normal"></div>
+                        <div class="w-[13%] h-full bg-yellow-900/50 border-r border-black/20" title="Overweight"></div>
+                        <div class="w-[25%] h-full bg-red-900/50" title="Obese"></div>
+                    </div>
+                    <!-- Pointer -->
+                    <div class="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_10px_white] transform -translate-x-1/2 transition-all duration-1000"
+                        style="left: {{ bmi|widthratio:40:100 }}%;"></div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 flex justify-between">
+                    <span>0</span>
+                    <span>18.5</span>
+                    <span>25</span>
+                    <span>30</span>
+                    <span>40+</span>
+                </p>
+            </div>
+
+            <!-- Metabolic Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-800/50 backdrop-blur-md rounded-3xl p-6 border border-white/5">
+                    <h3 class="text-gray-400 text-xs uppercase font-bold mb-2">Basal Metabolic Rate (BMR)</h3>
+                    <div class="text-3xl font-bold text-white">{{ bmr }} <span
+                            class="text-sm font-normal text-gray-500">kcal/day</span></div>
+                    <p class="text-xs text-gray-500 mt-2">Calories burned at complete rest.</p>
+                </div>
+                <div class="bg-gray-800/50 backdrop-blur-md rounded-3xl p-6 border border-white/5">
+                    <h3 class="text-gray-400 text-xs uppercase font-bold mb-2">TDEE (Maintenance)</h3>
+                    <div class="text-3xl font-bold text-white">{{ tdee }} <span
+                            class="text-sm font-normal text-gray-500">kcal/day</span></div>
+                    <p class="text-xs text-gray-500 mt-2">Calories burned with current activity level.</p>
+                </div>
+            </div>
+
+            <!-- Recommendation -->
+            <div
+                class="bg-gradient-to-r from-cyan-900/20 to-blue-900/20 rounded-3xl p-8 border border-cyan-500/30 relative">
+                <div class="flex items-start space-x-4">
+                    <div class="p-3 bg-cyan-500/10 rounded-xl">
+                        <svg class="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white mb-2">AI Diet Recommendation</h3>
+                        <p class="text-gray-300 mb-4">{{ suggestion }}</p>
+
+                        <div
+                            class="inline-flex items-center space-x-2 bg-black/30 rounded-lg px-4 py-2 border border-white/10">
+                            <span class="text-sm text-gray-400">Target Intake:</span>
+                            <span class="text-lg font-bold text-cyan-400">{{ suggested_calories }} kcal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

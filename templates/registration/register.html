@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[60vh]">
+    <div
+        class="w-full max-w-md p-8 space-y-8 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+
+        <!-- Decorative Elements -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl -ml-16 -mb-16"></div>
+
+        <div class="text-center relative z-10">
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+                Join FIX-FIT</h2>
+            <p class="mt-2 text-sm text-gray-400">Start your premium wellness journey</p>
+        </div>
+
+        <form method="post" class="mt-8 space-y-6 relative z-10">
+            {% csrf_token %}
+            {% if form.errors %}
+            <div
+                class="text-red-400 text-sm text-center bg-red-500/10 p-2 rounded-lg border border-red-500/20 animate-pulse">
+                Please fix the errors below.
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-1">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <p class="mt-1 text-xs text-red-400">{{ field.errors.0 }}</p>
+                    {% endif %}
+                    {% if field.help_text %}
+                    <p class="mt-1 text-xs text-gray-500">{{ field.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-400 hover:to-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all transform hover:scale-[1.02]">
+                Create Account
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-400 mt-6">
+            Already a member?
+            <a href="{% url 'login' %}" class="font-medium text-purple-400 hover:text-purple-300 transition-colors">Sign
+                in</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

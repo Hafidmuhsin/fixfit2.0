@@ -1,0 +1,21 @@
+{
+  "name": "fixfit",
+  "version": "1.0.0",
+  "description": "Luxury 3D Health & Wellness Tracking Platform",
+  "scripts": {
+    "dev": "npx tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch",
+    "build": "npx tailwindcss -i ./static/css/input.css -o ./static/css/output.css --minify"
+  },
+  "keywords": ["health", "wellness", "django", "tailwind"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  },
+  "dependencies": {
+    "alpinejs": "^3.13.5",
+    "chart.js": "^4.4.1",
+    "three": "^0.160.0",
+    "gsap": "^3.12.5"
+  }
+}

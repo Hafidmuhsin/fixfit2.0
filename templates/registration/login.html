@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[60vh]">
+    <div
+        class="w-full max-w-md p-8 space-y-8 bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+
+        <!-- Decorative Elements -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -ml-16 -mb-16"></div>
+
+        <div class="text-center relative z-10">
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
+                Welcome Back</h2>
+            <p class="mt-2 text-sm text-gray-400">Sign in to your luxury dashboard</p>
+        </div>
+
+        <form method="post" class="mt-8 space-y-6 relative z-10">
+            {% csrf_token %}
+            {% if form.errors %}
+            <div
+                class="text-red-400 text-sm text-center bg-red-500/10 p-2 rounded-lg border border-red-500/20 animate-pulse">
+                Please check your credentials and try again.
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                <div>
+                    <label for="id_username" class="text-sm font-medium text-gray-300">Username or Email</label>
+                    <input type="text" name="username" required id="id_username"
+                        class="w-full mt-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
+                        placeholder="Enter your username or email">
+                </div>
+                <div>
+                    <label for="id_password" class="text-sm font-medium text-gray-300">Password</label>
+                    <input type="password" name="password" required id="id_password"
+                        class="w-full mt-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                        placeholder="••••••••">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center">
+                    <input id="remember-me" name="remember-me" type="checkbox"
+                        class="h-4 w-4 text-cyan-500 focus:ring-cyan-500 border-gray-600 rounded bg-gray-700">
+                    <label for="remember-me" class="ml-2 block text-gray-400">Remember me</label>
+                </div>
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-cyan-400 hover:text-cyan-300 transition-colors">Forgot
+                        password?</a>
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-all transform hover:scale-[1.02]">
+                Sign In
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-400 mt-6">
+            Not a member?
+            <a href="{% url 'register' %}" class="font-medium text-cyan-400 hover:text-cyan-300 transition-colors">Start
+                your journey</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

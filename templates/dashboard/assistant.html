@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="h-[calc(100vh-140px)] flex flex-col relative max-w-4xl mx-auto">
+
+    <!-- Chat Header -->
+    <div
+        class="bg-gray-900/80 backdrop-blur-md border border-white/10 rounded-t-3xl p-6 flex items-center justify-between z-10 sticky top-0">
+        <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-400 to-purple-500 p-0.5 animate-pulse">
+                <div class="w-full h-full bg-gray-900 rounded-full flex items-center justify-center">
+                    <span class="text-2xl">🤖</span>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-white">FitBot AI Coach</h2>
+                <div class="flex items-center space-x-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+                    <span class="text-xs text-green-400 font-medium">Online & Ready</span>
+                </div>
+            </div>
+        </div>
+        <button class="text-gray-400 hover:text-white transition-colors" onclick="location.reload()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                </path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Chat Messages Area -->
+    <div id="chat-container"
+        class="flex-grow overflow-y-auto p-6 space-y-6 bg-gray-900/30 backdrop-blur-sm border-x border-white/5 scroll-smooth custom-scrollbar">
+        <!-- Welcome Message -->
+        <div class="flex justify-start animate-fade-in-up">
+            <div
+                class="bg-gray-800/80 backdrop-blur-md border border-white/10 text-gray-200 px-6 py-4 rounded-2xl rounded-tl-none max-w-lg shadow-lg">
+                <p class="mb-2">Hello {{ user.first_name }}! 👋 I'm your personal AI health assistant.</p>
+                <p class="text-sm text-gray-400">Ask me about:</p>
+                <ul class="list-disc list-inside text-sm text-gray-400 mt-1 space-y-1">
+                    <li>Meal plans based on your goals</li>
+                    <li>Workout suggestions for today</li>
+                    <li>Hydration tips</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="bg-gray-900/80 backdrop-blur-md border border-white/10 rounded-b-3xl p-6 z-10 sticky bottom-0">
+        <form id="chat-form" class="relative flex items-center space-x-4">
+            <input type="text" id="user-input"
+                class="w-full bg-gray-800/50 border border-white/10 text-white rounded-xl py-4 px-6 focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all placeholder-gray-500"
+                placeholder="Type your question here (e.g. 'Suggest a protein rich breakfast')..." autocomplete="off">
+
+            <button type="submit"
+                class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-xl px-6 py-4 font-bold shadow-lg shadow-cyan-500/20 transition-all transform hover:scale-105">
+                Send
+            </button>
+        </form>
+    </div>
+
+</div>
+
+<!-- Styles for scrollbar and animation -->
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fadeInUp 0.3s ease-out forwards;
+    }
+</style>
+
+<!-- JS Logic for Simulation -->
+<script>
+    const chatContainer = document.getElementById('chat-container');
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+
+    chatForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        // 1. Add User Message
+        addMessage(text, 'user');
+        userInput.value = '';
+
+        // 2. Show Typing Indicator
+        showTypingIndicator();
+
+        // 3. Generate Response
+        const responseText = await generateAIResponse(text);
+
+        removeTypingIndicator();
+        addMessage(responseText, 'ai');
+    });
+
+    function addMessage(text, sender) {
+        const div = document.createElement('div');
+        div.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`;
+
+        const bubble = document.createElement('div');
+        bubble.className = sender === 'user'
+            ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-4 rounded-2xl rounded-tr-none max-w-lg shadow-lg'
+            : 'bg-gray-800/80 backdrop-blur-md border border-white/10 text-gray-200 px-6 py-4 rounded-2xl rounded-tl-none max-w-lg shadow-lg';
+
+        // Format simple Markdown
+        let formatted = text.replace(/\n/g, '<br>');
+        formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+        formatted = formatted.replace(/\*(.*?)\*/g, '<i>$1</i>');
+
+        bubble.innerHTML = formatted;
+
+        div.appendChild(bubble);
+        chatContainer.appendChild(div);
+        scrollToBottom();
+    }
+
+    function showTypingIndicator() {
+        const div = document.createElement('div');
+        div.id = 'typing-indicator';
+        div.className = 'flex justify-start animate-fade-in-up';
+        div.innerHTML = `
+            <div class="bg-gray-800/50 border border-white/5 px-4 py-3 rounded-2xl rounded-tl-none flex space-x-1">
+                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+            </div>
+        `;
+        chatContainer.appendChild(div);
+        scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) indicator.remove();
+    }
+
+    function scrollToBottom() {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    async function generateAIResponse(input) {
+        try {
+            const response = await fetch("{% url 'ask_ai' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: input })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                return errorData.answer || `Server Error (${response.status})`;
+            }
+
+            const data = await response.json();
+            return data.answer || "I received an empty response.";
+        } catch (error) {
+            console.error('AI API Error:', error);
+            // Fallback if API fails completely
+            return "I'm having connection issues. Please check your internet or try again later.";
+        }
+    }
+</script>
+{% endblock %}
