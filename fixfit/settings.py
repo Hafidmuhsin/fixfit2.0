@@ -27,7 +27,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-default-key-change-in
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app', '.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.vercel.app', '.onrender.com', '.pythonanywhere.com']
 
 
 # Application definition
